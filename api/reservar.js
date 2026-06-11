@@ -32,7 +32,7 @@ export default async function handler(req, res) {
           'Authorization': `Bearer ${RESEND_API_KEY}`
         },
         body: JSON.stringify({
-          from: 'Gangnam Sevilla <reservas@gangnam.es>',
+          from: 'Gangnam Sevilla <onboarding@resend.dev>',
           to: [email],
           subject: '✅ Reserva recibida – Gangnam Sevilla',
           html: `
