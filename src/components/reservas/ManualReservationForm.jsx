@@ -5,8 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from "lucide-react";
 
-const SUPABASE_URL = 'https://mgenujgupjssevfqipfi.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nZW51amd1cGpzc2V2ZnFpcGZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMDM4MTksImV4cCI6MjA5NDg3OTgxOX0.R9fGvRKIUW7DHDGh4hsDawBMYzjgbU2DuAG81pnWID8';
+const SUPABASE_URL = 'https://nbcmyfzjylydhvngtalc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iY215ZnpqeWx5ZGh2bmd0YWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTI1ODYsImV4cCI6MjA5Njc2ODU4Nn0.iqOrYszYHPfbyjcUs2dVGz_EGRL7LffTWbWErATVSJo';
 
 const TIME_SLOTS_LUNCH = ["13:15", "13:45", "14:15", "14:45", "15:15", "15:45"];
 const TIME_SLOTS_DINNER = ["20:15", "20:45", "21:15", "21:45", "22:15", "22:45"];
@@ -27,7 +27,7 @@ export default function ManualReservationForm({ defaultDate, defaultTime, onClos
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    await fetch(`${SUPABASE_URL}/rest/v1/gangnam_reservations`, {
+    await fetch(`${SUPABASE_URL}/rest/v1/reservations`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

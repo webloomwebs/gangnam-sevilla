@@ -2,8 +2,8 @@
 // Guarda en Supabase + notifica via Make.com (WhatsApp + email)
 
 const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/1dp239il1a303f1urlm877fw1q8ob8b4';
-const SUPABASE_URL = 'https://mgenujgupjssevfqipfi.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nZW51amd1cGpzc2V2ZnFpcGZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMDM4MTksImV4cCI6MjA5NDg3OTgxOX0.R9fGvRKIUW7DHDGh4hsDawBMYzjgbU2DuAG81pnWID8';
+const SUPABASE_URL = 'https://nbcmyfzjylydhvngtalc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iY215ZnpqeWx5ZGh2bmd0YWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTI1ODYsImV4cCI6MjA5Njc2ODU4Nn0.iqOrYszYHPfbyjcUs2dVGz_EGRL7LffTWbWErATVSJo';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
   try {
     // 1. Guardar reserva en Supabase
-    await fetch(`${SUPABASE_URL}/rest/v1/gangnam_reservations`, {
+    await fetch(`${SUPABASE_URL}/rest/v1/reservations`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
