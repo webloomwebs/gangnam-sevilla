@@ -1,40 +1,142 @@
-import React from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { base44 } from "@/api/base44Client";
-
 import AvailabilityView from "@/components/reservas/AvailabilityView";
 
+const SUPABASE_URL = 'https://mgenujgupjssevfqipfi.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nZW51amd1cGpzc2V2ZnFpcGZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMDM4MTksImV4cCI6MjA5NDg3OTgxOX0.R9fGvRKIUW7DHDGh4hsDawBMYzjgbU2DuAG81pnWID8';
+
+// Contraseña simple para proteger el panel
+const ADMIN_PASSWORD = 'gangnam2026';
+
+async function fetchReservations() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/gangnam_reservations?order=created_at.desc&limit=500`,
+    {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    }
+  );
+  if (!res.ok) throw new Error('Error cargando reservas');
+  return res.json();
+}
+
+async function deleteReservation(id) {
+  await fetch(`${SUPABASE_URL}/rest/v1/gangnam_reservations?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+    }
+  });
+}
+
 export default function Reservas() {
-  const queryClient = useQueryClient();
+  const [reservations, setReservations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
 
-  const { data: reservations = [], isLoading } = useQuery({
-    queryKey: ["reservations"],
-    queryFn: () => base44.entities.Reservation.list("-created_date", 500),
-  });
+  const loadReservations = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchReservations();
+      setReservations(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Reservation.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["reservations"] }),
-  });
+  useEffect(() => {
+    const saved = sessionStorage.getItem('gangnam_admin');
+    if (saved === 'true') setAuthenticated(true);
+  }, []);
+
+  useEffect(() => {
+    if (authenticated) loadReservations();
+  }, [authenticated, loadReservations]);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+      sessionStorage.setItem('gangnam_admin', 'true');
+      setAuthenticated(true);
+    } else {
+      setPasswordError(true);
+      setTimeout(() => setPasswordError(false), 2000);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    await deleteReservation(id);
+    setReservations(prev => prev.filter(r => r.id !== id));
+  };
+
+  // Pantalla de login
+  if (!authenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#fef8f5] via-[#fff5f0] to-[#fef8f5] flex items-center justify-center p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-3xl shadow-xl border border-[#ffc1b3]/20 p-10 w-full max-w-sm"
+        >
+          <h1 className="text-2xl font-extralight tracking-[0.2em] text-[#1a1a1a] mb-1 text-center">GANGNAM</h1>
+          <p className="text-[#ff9a8b] text-xs tracking-widest text-center mb-8">PANEL DE RESERVAS</p>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <input
+              type="password"
+              placeholder="Contraseña"
+              value={passwordInput}
+              onChange={e => setPasswordInput(e.target.value)}
+              className={`w-full border rounded-lg h-12 px-4 text-sm outline-none transition-all duration-300
+                ${passwordError ? 'border-red-400 bg-red-50' : 'border-[#2d2d2d]/20 focus:border-[#ff9a8b]'}`}
+              autoFocus
+            />
+            {passwordError && <p className="text-red-500 text-xs text-center">Contraseña incorrecta</p>}
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-[#ff9a8b] to-[#ffc1b3] text-white rounded-xl h-12 text-sm tracking-[0.15em] font-medium hover:shadow-lg transition-all duration-300"
+            >
+              ENTRAR
+            </button>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fef8f5] via-[#fff5f0] to-[#fef8f5] p-6">
       <div className="max-w-5xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-          <h1 className="text-3xl font-extralight tracking-[0.2em] text-[#1a1a1a] mb-1">RESERVAS</h1>
-          <p className="text-[#ff9a8b] text-sm tracking-widest">GANGNAM SEVILLA</p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-extralight tracking-[0.2em] text-[#1a1a1a] mb-1">RESERVAS</h1>
+            <p className="text-[#ff9a8b] text-sm tracking-widest">GANGNAM SEVILLA</p>
+          </div>
+          <button
+            onClick={() => { sessionStorage.removeItem('gangnam_admin'); setAuthenticated(false); }}
+            className="text-xs text-[#2d2d2d]/40 hover:text-[#ff9a8b] transition-colors tracking-wider mt-2"
+          >
+            CERRAR SESIÓN
+          </button>
         </motion.div>
 
         {isLoading ? (
           <p className="text-center text-[#2d2d2d]/50 py-12">Cargando...</p>
         ) : (
           <>
-            <p className="text-sm text-[#2d2d2d]/50 mb-4">Capacidad: 49 personas por franja horaria. Mesa ocupa 1h. Los miércoles están cerrados.</p>
+            <p className="text-sm text-[#2d2d2d]/50 mb-4">
+              Capacidad: 49 personas por franja horaria. Miércoles cerrado.
+            </p>
             <AvailabilityView
               reservations={reservations}
-              onRefresh={() => queryClient.invalidateQueries({ queryKey: ["reservations"] })}
-              onDelete={(id) => deleteMutation.mutate(id)}
+              onRefresh={loadReservations}
+              onDelete={handleDelete}
             />
           </>
         )}

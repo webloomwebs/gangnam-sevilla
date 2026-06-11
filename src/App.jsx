@@ -7,6 +7,7 @@ import Contacto from './pages/Contacto';
 import AvisoLegal from './pages/AvisoLegal';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import PoliticaCookies from './pages/PoliticaCookies';
+import Reservas from './pages/Reservas';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/AvisoLegal" element={<AvisoLegal />} />
         <Route path="/PoliticaPrivacidad" element={<PoliticaPrivacidad />} />
         <Route path="/PoliticaCookies" element={<PoliticaCookies />} />
+        <Route path="/Reservas" element={<Reservas />} />
         <Route path="*" element={<Home />} />
       </Routes>
       <Toaster />
