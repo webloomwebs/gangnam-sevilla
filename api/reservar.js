@@ -17,10 +17,14 @@ async function sendConfirmationEmail({ name, email, date, time, guests, comments
 
 Tu reserva en Gangnam Sevilla está confirmada para el ${date} a las ${time} (${guests} personas).${comentariosLinea}
 
-Si necesitas cambiar algo, contesta a este correo y te ayudamos.
+C. San Felipe, 11, Casco Antiguo, 41003, Sevilla
+Tel: +34 645 80 57 58
+
+Si necesitas cambiar algo, contesta a este correo o llámanos.
 
 Un saludo,
-Gangnam Sevilla`;
+Gangnam Sevilla
+https://gangnam.es`;
 
   const html = `
     <div style="max-width: 480px; margin: 0 auto; padding: 48px 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-align: center; color: #1a1a1a;">
@@ -30,7 +34,14 @@ Gangnam Sevilla`;
       <p style="font-size: 24px; font-weight: 600; margin: 0 0 4px;">${date}</p>
       <p style="font-size: 15px; color: #777; margin: 0 0 36px;">a las ${time} &middot; ${guests} personas</p>
       ${comments && comments.trim() ? `<p style="font-size: 14px; color: #777; margin: 0 0 36px;">${comments}</p>` : ''}
-      <p style="font-size: 13px; color: #aaa; margin-top: 8px;">Si necesitas cambiar algo, responde a este correo.</p>
+      <p style="font-size: 13px; color: #aaa; margin: 0 0 32px;">Si necesitas cambiar algo, responde a este correo o llámanos al <a href="tel:+34645805758" style="color: #777;">+34 645 80 57 58</a>.</p>
+      <hr style="border: none; border-top: 1px solid #eee; margin: 0 0 24px;">
+      <p style="font-size: 12px; color: #aaa; line-height: 1.6; margin: 0;">
+        Gangnam Sevilla · C. San Felipe, 11, Casco Antiguo, 41003, Sevilla<br>
+        <a href="https://gangnam.es" style="color: #aaa;">gangnam.es</a> &middot;
+        <a href="https://gangnam.es/PoliticaPrivacidad" style="color: #aaa;">Privacidad</a> &middot;
+        <a href="https://gangnam.es/AvisoLegal" style="color: #aaa;">Aviso legal</a>
+      </p>
     </div>
   `;
 
@@ -42,7 +53,7 @@ Gangnam Sevilla`;
     },
     body: JSON.stringify({
       from: 'Gangnam Sevilla <reservas@gangnam.es>',
-      reply_to: 'oriolarang@gmail.com',
+      reply_to: 'gangnam.sevilla@gmail.com',
       to: [email],
       text,
       subject: `Reserva confirmada — ${date} a las ${time}`,
