@@ -11,30 +11,39 @@ async function sendConfirmationEmail({ name, email, date, time, guests, comments
     return;
   }
 
-  const comentariosLinea = comments && comments.trim() ? `\n\nNos comentas: ${comments}` : '';
-
   const text = `Hola ${name},
 
-Tu reserva en Gangnam Sevilla está confirmada para el ${date} a las ${time} (${guests} personas).${comentariosLinea}
+Tu reserva en Gangnam Sevilla está confirmada.
 
-C. San Felipe, 11, Casco Antiguo, 41003, Sevilla
-Tel: +34 645 80 57 58
+Fecha: ${date}
+Hora: ${time}
+Personas: ${guests}${comments && comments.trim() ? `\nComentarios: ${comments}` : ''}
 
-Si necesitas cambiar algo, contesta a este correo o llámanos.
+Si necesitas cambiar algo, llámanos al +34 645 80 57 58.
 
-Un saludo,
+¡Hasta pronto!
 Gangnam Sevilla
 https://gangnam.es`;
+
+  const filas = [
+    ['Fecha', date],
+    ['Hora', time],
+    ['Personas', guests],
+    ...(comments && comments.trim() ? [['Comentarios', comments]] : []),
+  ].map(([label, value]) => `
+      <div style="margin-bottom: 18px;">
+        <div style="font-size: 11px; letter-spacing: 1px; color: #999; text-transform: uppercase; margin-bottom: 2px;">${label}</div>
+        <div style="font-size: 18px; font-weight: 600; color: #1a1a1a;">${value}</div>
+      </div>`).join('');
 
   const html = `
     <div style="max-width: 480px; margin: 0 auto; padding: 48px 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-align: center; color: #1a1a1a;">
       <h1 style="font-size: 34px; font-weight: 300; letter-spacing: 9px; color: #FF9A8B; margin: 0 0 6px;">GANGNAM</h1>
-      <p style="font-size: 11px; letter-spacing: 2px; color: #999; text-transform: uppercase; margin: 0 0 44px;">Reserva confirmada</p>
-      <p style="font-size: 15px; color: #444; margin: 0 0 20px;">Hola ${name}, te esperamos el</p>
-      <p style="font-size: 24px; font-weight: 600; margin: 0 0 4px;">${date}</p>
-      <p style="font-size: 15px; color: #777; margin: 0 0 36px;">a las ${time} &middot; ${guests} personas</p>
-      ${comments && comments.trim() ? `<p style="font-size: 14px; color: #777; margin: 0 0 36px;">${comments}</p>` : ''}
-      <p style="font-size: 13px; color: #aaa; margin: 0 0 32px;">Si necesitas cambiar algo, responde a este correo o llámanos al <a href="tel:+34645805758" style="color: #777;">+34 645 80 57 58</a>.</p>
+      <p style="font-size: 11px; letter-spacing: 2px; color: #999; text-transform: uppercase; margin: 0 0 40px;">Reserva confirmada</p>
+      <p style="font-size: 15px; color: #444; margin: 0 0 32px;">Hola ${name},</p>
+      <div style="text-align: left; max-width: 260px; margin: 0 auto 32px;">${filas}</div>
+      <p style="font-size: 13px; color: #aaa; margin: 0 0 8px;">Si necesitas cambiar algo, llámanos al <a href="tel:+34645805758" style="color: #777;">+34 645 80 57 58</a>.</p>
+      <p style="font-size: 16px; color: #1a1a1a; margin: 24px 0 40px;">¡Hasta pronto!</p>
       <hr style="border: none; border-top: 1px solid #eee; margin: 0 0 24px;">
       <p style="font-size: 12px; color: #aaa; line-height: 1.6; margin: 0;">
         Gangnam Sevilla · C. San Felipe, 11, Casco Antiguo, 41003, Sevilla<br>
