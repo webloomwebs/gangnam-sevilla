@@ -30,28 +30,54 @@ https://gangnam.es`;
     ['Hora', time],
     ['Personas', guests],
     ...(comments && comments.trim() ? [['Comentarios', comments]] : []),
-  ].map(([label, value]) => `
-      <div style="margin-bottom: 18px;">
-        <div style="font-size: 11px; letter-spacing: 1px; color: #999; text-transform: uppercase; margin-bottom: 2px;">${label}</div>
-        <div style="font-size: 18px; font-weight: 600; color: #1a1a1a;">${value}</div>
-      </div>`).join('');
+  ].map(([label, value], i, arr) => `
+              <tr>
+                <td style="padding: ${i === 0 ? '0' : '14px'} 0 ${i === arr.length - 1 ? '0' : '14px'}; ${i < arr.length - 1 ? 'border-bottom: 1px solid #F3DEDA;' : ''}">
+                  <div style="font-size: 11px; letter-spacing: 1px; color: #B98A82; text-transform: uppercase; margin-bottom: 3px;">${label}</div>
+                  <div style="font-size: 17px; font-weight: 600; color: #3a2420;">${value}</div>
+                </td>
+              </tr>`).join('');
 
   const html = `
-    <div style="max-width: 480px; margin: 0 auto; padding: 48px 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-align: center; color: #1a1a1a;">
-      <h1 style="font-size: 34px; font-weight: 300; letter-spacing: 9px; color: #FF9A8B; margin: 0 0 6px;">GANGNAM</h1>
-      <p style="font-size: 11px; letter-spacing: 2px; color: #999; text-transform: uppercase; margin: 0 0 40px;">Reserva confirmada</p>
-      <p style="font-size: 15px; color: #444; margin: 0 0 32px;">Hola ${name},</p>
-      <div style="text-align: left; max-width: 260px; margin: 0 auto 32px;">${filas}</div>
-      <p style="font-size: 13px; color: #aaa; margin: 0 0 8px;">Si necesitas cambiar algo, llámanos al <a href="tel:+34645805758" style="color: #777;">+34 645 80 57 58</a>.</p>
-      <p style="font-size: 16px; color: #1a1a1a; margin: 24px 0 40px;">¡Hasta pronto!</p>
-      <hr style="border: none; border-top: 1px solid #eee; margin: 0 0 24px;">
-      <p style="font-size: 12px; color: #aaa; line-height: 1.6; margin: 0;">
-        Gangnam Sevilla · C. San Felipe, 11, Casco Antiguo, 41003, Sevilla<br>
-        <a href="https://gangnam.es" style="color: #aaa;">gangnam.es</a> &middot;
-        <a href="https://gangnam.es/PoliticaPrivacidad" style="color: #aaa;">Privacidad</a> &middot;
-        <a href="https://gangnam.es/AvisoLegal" style="color: #aaa;">Aviso legal</a>
-      </p>
-    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #FBF1EE; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 460px; background-color: #ffffff; border-radius: 20px; overflow: hidden;">
+            <tr>
+              <td style="padding: 44px 36px 40px; text-align: center;">
+                <h1 style="font-size: 32px; font-weight: 300; letter-spacing: 8px; color: #FF9A8B; margin: 0;">GANGNAM</h1>
+                <div style="width: 36px; height: 2px; background-color: #FF9A8B; margin: 14px auto 18px;"></div>
+                <p style="font-size: 11px; letter-spacing: 2px; color: #b0a29d; text-transform: uppercase; margin: 0 0 28px;">Reserva confirmada</p>
+                <p style="font-size: 15px; color: #444; margin: 0 0 24px;">Hola ${name},</p>
+
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #FFF5F2; border-radius: 14px; margin: 0 0 28px;">
+                  <tr>
+                    <td style="padding: 22px 26px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="text-align: left;">
+                        ${filas}
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="font-size: 13px; color: #aaa; margin: 0 0 4px;">¿Necesitas cambiar algo?</p>
+                <p style="font-size: 14px; margin: 0 0 28px;"><a href="tel:+34645805758" style="color: #FF9A8B; font-weight: 600; text-decoration: none;">+34 645 80 57 58</a></p>
+
+                <p style="font-size: 17px; color: #3a2420; margin: 0 0 32px;">¡Hasta pronto!</p>
+
+                <hr style="border: none; border-top: 1px solid #f0e4e1; margin: 0 0 20px;">
+                <p style="font-size: 11px; color: #c2b5b0; line-height: 1.7; margin: 0;">
+                  Gangnam Sevilla · C. San Felipe, 11, Casco Antiguo, 41003, Sevilla<br>
+                  <a href="https://gangnam.es" style="color: #c2b5b0;">gangnam.es</a> &middot;
+                  <a href="https://gangnam.es/PoliticaPrivacidad" style="color: #c2b5b0;">Privacidad</a> &middot;
+                  <a href="https://gangnam.es/AvisoLegal" style="color: #c2b5b0;">Aviso legal</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `;
 
   const response = await fetch('https://api.resend.com/emails', {
