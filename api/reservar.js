@@ -1,9 +1,49 @@
 // Vercel serverless function — POST /api/reservar
-// Guarda en Supabase + notifica: email al cliente via Make.com + WhatsApp al restaurante via Meta Cloud API
+// Guarda en Supabase + notifica: email al cliente via Resend + WhatsApp al restaurante via Meta Cloud API
 
-const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/1dp239il1a303f1urlm877fw1q8ob8b4';
 const SUPABASE_URL = 'https://nbcmyfzjylydhvngtalc.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iY215ZnpqeWx5ZGh2bmd0YWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTI1ODYsImV4cCI6MjA5Njc2ODU4Nn0.iqOrYszYHPfbyjcUs2dVGz_EGRL7LffTWbWErATVSJo';
+
+async function sendConfirmationEmail({ name, email, date, time, guests, comments }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error('[Email] Falta RESEND_API_KEY');
+    return;
+  }
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; color: #1a1a1a;">
+      <h1 style="font-size: 20px; margin-bottom: 4px;">¡Reserva confirmada, ${name}!</h1>
+      <p style="color: #555; font-size: 14px; margin-bottom: 24px;">Te esperamos en Gangnam Sevilla.</p>
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <tr><td style="padding: 6px 0; color: #888;">Fecha</td><td style="padding: 6px 0; text-align: right;"><strong>${date}</strong></td></tr>
+        <tr><td style="padding: 6px 0; color: #888;">Hora</td><td style="padding: 6px 0; text-align: right;"><strong>${time}</strong></td></tr>
+        <tr><td style="padding: 6px 0; color: #888;">Personas</td><td style="padding: 6px 0; text-align: right;"><strong>${guests}</strong></td></tr>
+        ${comments && comments.trim() ? `<tr><td style="padding: 6px 0; color: #888;">Comentarios</td><td style="padding: 6px 0; text-align: right;">${comments}</td></tr>` : ''}
+      </table>
+      <p style="color: #888; font-size: 12px; margin-top: 32px;">Si necesitas modificar o cancelar tu reserva, responde a este correo.</p>
+    </div>
+  `;
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'Gangnam Sevilla <reservas@gangnam.es>',
+      to: [email],
+      subject: `Reserva confirmada — ${date} a las ${time}`,
+      html,
+    }),
+  });
+
+  const data = await response.json();
+  if (data.error || !response.ok) {
+    console.error('[Email] Error enviando confirmación a', email, data.error || data);
+  }
+}
 
 async function notifyRestaurantWhatsApp({ name, date, time, guests, phone, comments }) {
   const token = process.env.WA_API_TOKEN;
@@ -80,14 +120,10 @@ export default async function handler(req, res) {
       body: JSON.stringify({ name, email, phone, date, time, guests, comments, status: 'confirmed' })
     });
 
-    // 2. Email de confirmación al cliente via Make.com
-    await fetch(MAKE_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, phone, date, time, guests, comments })
-    });
+    // 2. Email de confirmación al cliente via Resend (antes: Make.com)
+    await sendConfirmationEmail({ name, email, date, time, guests, comments });
 
-    // 3. Aviso de WhatsApp al restaurante via Meta Cloud API (sustituye al Twilio de Make.com)
+    // 3. Aviso de WhatsApp al restaurante via Meta Cloud API
     await notifyRestaurantWhatsApp({ name, date, time, guests, phone, comments });
 
     return res.status(200).json({ success: true });
