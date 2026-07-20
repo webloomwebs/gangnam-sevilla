@@ -23,11 +23,14 @@ Un saludo,
 Gangnam Sevilla`;
 
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 15px; color: #1a1a1a; line-height: 1.6;">
-      <p>Hola ${name},</p>
-      <p>Tu reserva en Gangnam Sevilla está confirmada para el <strong>${date} a las ${time}</strong> (${guests} personas).${comments && comments.trim() ? `<br>Nos comentas: ${comments}` : ''}</p>
-      <p>Si necesitas cambiar algo, contesta a este correo y te ayudamos.</p>
-      <p>Un saludo,<br>Gangnam Sevilla</p>
+    <div style="max-width: 480px; margin: 0 auto; padding: 48px 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-align: center; color: #1a1a1a;">
+      <h1 style="font-size: 34px; font-weight: 300; letter-spacing: 9px; color: #FF9A8B; margin: 0 0 6px;">GANGNAM</h1>
+      <p style="font-size: 11px; letter-spacing: 2px; color: #999; text-transform: uppercase; margin: 0 0 44px;">Reserva confirmada</p>
+      <p style="font-size: 15px; color: #444; margin: 0 0 20px;">Hola ${name}, te esperamos el</p>
+      <p style="font-size: 24px; font-weight: 600; margin: 0 0 4px;">${date}</p>
+      <p style="font-size: 15px; color: #777; margin: 0 0 36px;">a las ${time} &middot; ${guests} personas</p>
+      ${comments && comments.trim() ? `<p style="font-size: 14px; color: #777; margin: 0 0 36px;">${comments}</p>` : ''}
+      <p style="font-size: 13px; color: #aaa; margin-top: 8px;">Si necesitas cambiar algo, responde a este correo.</p>
     </div>
   `;
 
