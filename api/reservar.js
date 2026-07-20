@@ -11,17 +11,23 @@ async function sendConfirmationEmail({ name, email, date, time, guests, comments
     return;
   }
 
+  const comentariosLinea = comments && comments.trim() ? `\n\nNos comentas: ${comments}` : '';
+
+  const text = `Hola ${name},
+
+Tu reserva en Gangnam Sevilla está confirmada para el ${date} a las ${time} (${guests} personas).${comentariosLinea}
+
+Si necesitas cambiar algo, contesta a este correo y te ayudamos.
+
+Un saludo,
+Gangnam Sevilla`;
+
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; color: #1a1a1a;">
-      <h1 style="font-size: 20px; margin-bottom: 4px;">¡Reserva confirmada, ${name}!</h1>
-      <p style="color: #555; font-size: 14px; margin-bottom: 24px;">Te esperamos en Gangnam Sevilla.</p>
-      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-        <tr><td style="padding: 6px 0; color: #888;">Fecha</td><td style="padding: 6px 0; text-align: right;"><strong>${date}</strong></td></tr>
-        <tr><td style="padding: 6px 0; color: #888;">Hora</td><td style="padding: 6px 0; text-align: right;"><strong>${time}</strong></td></tr>
-        <tr><td style="padding: 6px 0; color: #888;">Personas</td><td style="padding: 6px 0; text-align: right;"><strong>${guests}</strong></td></tr>
-        ${comments && comments.trim() ? `<tr><td style="padding: 6px 0; color: #888;">Comentarios</td><td style="padding: 6px 0; text-align: right;">${comments}</td></tr>` : ''}
-      </table>
-      <p style="color: #888; font-size: 12px; margin-top: 32px;">Si necesitas modificar o cancelar tu reserva, responde a este correo.</p>
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 15px; color: #1a1a1a; line-height: 1.6;">
+      <p>Hola ${name},</p>
+      <p>Tu reserva en Gangnam Sevilla está confirmada para el <strong>${date} a las ${time}</strong> (${guests} personas).${comments && comments.trim() ? `<br>Nos comentas: ${comments}` : ''}</p>
+      <p>Si necesitas cambiar algo, contesta a este correo y te ayudamos.</p>
+      <p>Un saludo,<br>Gangnam Sevilla</p>
     </div>
   `;
 
@@ -33,7 +39,9 @@ async function sendConfirmationEmail({ name, email, date, time, guests, comments
     },
     body: JSON.stringify({
       from: 'Gangnam Sevilla <reservas@gangnam.es>',
+      reply_to: 'oriolarang@gmail.com',
       to: [email],
+      text,
       subject: `Reserva confirmada — ${date} a las ${time}`,
       html,
     }),
