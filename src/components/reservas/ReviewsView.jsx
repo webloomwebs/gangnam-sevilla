@@ -33,7 +33,7 @@ export default function ReviewsView({ reviews, isLoading }) {
         <span className="text-3xl font-light text-[#1a1a1a]">{avg}</span>
         <div>
           <StarRow rating={Math.round(avg)} />
-          <p className="text-xs text-[#2d2d2d]/50 mt-1">{reviews.length} valoración{reviews.length !== 1 ? 'es' : ''}</p>
+          <p className="text-xs text-[#2d2d2d]/50 mt-1">{reviews.length} {reviews.length === 1 ? 'valoración' : 'valoraciones'}</p>
         </div>
       </div>
 
