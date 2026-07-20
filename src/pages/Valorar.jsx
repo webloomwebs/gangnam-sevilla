@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Star } from "lucide-react";
 
@@ -9,6 +9,28 @@ export default function Valorar() {
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | done | error | already
+  const [loadState, setLoadState] = useState(reservationId ? 'loading' : 'invalid'); // loading | found | invalid
+  const [reservation, setReservation] = useState(null);
+
+  useEffect(() => {
+    if (!reservationId) return;
+    let cancelled = false;
+    fetch(`/api/valorar?id=${encodeURIComponent(reservationId)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('not found');
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setReservation(data);
+        setLoadState('found');
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoadState('invalid');
+      });
+    return () => { cancelled = true; };
+  }, [reservationId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,10 +53,21 @@ export default function Valorar() {
     }
   };
 
-  if (!reservationId) {
+  if (loadState === 'invalid') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white px-6">
-        <p className="text-[#2d2d2d]/50 text-sm">Enlace no válido.</p>
+        <div className="text-center">
+          <h1 className="text-2xl font-extralight tracking-[0.3em] text-[#ff9a8b] mb-6">GANGNAM</h1>
+          <p className="text-[#2d2d2d]/50 text-sm">Este enlace de valoración no es válido o ha caducado.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadState === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white px-6">
+        <p className="text-[#2d2d2d]/30 text-sm">Cargando...</p>
       </div>
     );
   }
@@ -42,14 +75,16 @@ export default function Valorar() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-6">
       <div className="max-w-sm w-full text-center py-16">
-        <h1 className="text-3xl font-extralight tracking-[0.3em] text-[#ff9a8b] mb-14">GANGNAM</h1>
+        <h1 className="text-3xl font-extralight tracking-[0.3em] text-[#ff9a8b] mb-10">GANGNAM</h1>
 
         {status === 'done' ? (
-          <p className="text-[#1a1a1a] text-lg font-light">¡Gracias por tu valoración!</p>
+          <p className="text-[#1a1a1a] text-lg font-light">¡Gracias por tu valoración, {reservation.name}!</p>
         ) : status === 'already' ? (
           <p className="text-[#1a1a1a] text-lg font-light">Ya nos habías dejado tu valoración, ¡gracias!</p>
         ) : (
           <form onSubmit={handleSubmit}>
+            <p className="text-[#444] text-base mb-1">Hola {reservation.name},</p>
+            <p className="text-[#999] text-xs tracking-wide mb-8">Tu visita del {reservation.date} a las {reservation.time}</p>
             <p className="text-[#444] text-base mb-8">¿Qué tal tu experiencia?</p>
 
             <div className="flex justify-center gap-2 mb-8">

@@ -40,10 +40,13 @@ export default function ReviewsView({ reviews, isLoading }) {
       <div className="space-y-3">
         {reviews.map((r) => (
           <div key={r.id} className="bg-white rounded-xl p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1">
               <span className="font-medium text-[#1a1a1a] text-sm">{r.name}</span>
               <span className="text-xs text-[#2d2d2d]/40">{r.date}</span>
             </div>
+            <p className="text-xs text-[#2d2d2d]/40 mb-2">
+              {[r.email, r.phone].filter(Boolean).join(' · ')}
+            </p>
             <StarRow rating={r.rating} />
             {r.comment && (
               <p className="text-sm text-[#2d2d2d]/70 mt-2">{r.comment}</p>
