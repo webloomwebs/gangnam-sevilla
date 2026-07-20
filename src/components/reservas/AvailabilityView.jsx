@@ -4,9 +4,11 @@ import { ChevronDown, ChevronUp, Users, Plus, Phone, Mail, X, Trash2 } from "luc
 import { Button } from "@/components/ui/button";
 import ManualReservationForm from "./ManualReservationForm";
 
-const TIME_SLOTS_LUNCH = ["13:15", "13:45", "14:15", "14:45", "15:15", "15:45"];
-const TIME_SLOTS_DINNER = ["20:15", "20:45", "21:15", "21:45", "22:15", "22:45"];
-const ALL_TIME_SLOTS = [...TIME_SLOTS_LUNCH, ...TIME_SLOTS_DINNER];
+// Horario de verano: comida solo lunes/viernes/sábado/domingo (13:00-17:00),
+// cena todos los días de la semana (20:00-24:00, incluido miércoles)
+const TIME_SLOTS_LUNCH = ["13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00"];
+const TIME_SLOTS_DINNER = ["20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00"];
+const LUNCH_DAYS = new Set([0, 1, 5, 6]); // Domingo, Lunes, Viernes, Sábado
 const CAPACITY = 49;
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTH_NAMES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -46,8 +48,7 @@ export default function AvailabilityView({ reservations, onRefresh, onDelete }) 
   const days = useMemo(() => {
     const result = [];
     for (let i = 0; i < 30; i++) {
-      const date = addDays(today, i);
-      if (date.getDay() !== 3) result.push(date);
+      result.push(addDays(today, i));
     }
     return result;
   }, []);
@@ -94,8 +95,10 @@ export default function AvailabilityView({ reservations, onRefresh, onDelete }) 
         const dayOcc = occupancyByDate[dateStr] || {};
         const dayResv = reservationsByDate[dateStr] || [];
         const totalGuests = dayResv.reduce((a, r) => a + (r.guests === '9+' ? 9 : parseInt(r.guests) || 1), 0);
-        const fullSlots = ALL_TIME_SLOTS.filter(s => getEffectiveOccupancy(s, dayOcc) >= CAPACITY).length;
-        const isDayFull = fullSlots === ALL_TIME_SLOTS.length;
+        const hasLunch = LUNCH_DAYS.has(date.getDay());
+        const daySlots = hasLunch ? [...TIME_SLOTS_LUNCH, ...TIME_SLOTS_DINNER] : TIME_SLOTS_DINNER;
+        const fullSlots = daySlots.filter(s => getEffectiveOccupancy(s, dayOcc) >= CAPACITY).length;
+        const isDayFull = fullSlots === daySlots.length;
         const isExpanded = expandedDay === dateStr;
 
         return (
@@ -140,7 +143,9 @@ export default function AvailabilityView({ reservations, onRefresh, onDelete }) 
             {/* Expanded: time slots */}
             {isExpanded && (
               <div className="border-t border-gray-100 p-4 bg-gray-50/50">
-                {/* Comida */}
+                {/* Comida — solo lunes/viernes/sábado/domingo en horario de verano */}
+                {hasLunch && (
+                <>
                 <p className="text-xs text-gray-400 tracking-wider mb-2">COMIDA</p>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
                   {TIME_SLOTS_LUNCH.map(slot => {
@@ -167,7 +172,9 @@ export default function AvailabilityView({ reservations, onRefresh, onDelete }) 
                     );
                   })}
                 </div>
-                {/* Cena */}
+                </>
+                )}
+                {/* Cena — todos los días de la semana en horario de verano */}
                 <p className="text-xs text-gray-400 tracking-wider mb-2">CENA</p>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {TIME_SLOTS_DINNER.map(slot => {

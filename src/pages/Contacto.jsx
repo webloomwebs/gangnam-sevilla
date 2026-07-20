@@ -116,10 +116,9 @@ export default function Contacto() {
               <div>
                 <h2 className="text-[#1a1a1a] font-medium tracking-wider mb-1 text-sm uppercase">Horario</h2>
                 <p className="text-[#2d2d2d]/70 text-sm leading-relaxed">
-                  Lun–Mar, Jue–Dom<br />
-                  13:15–16:45 · 20:15–23:45
+                  Comida (Lun, Vie–Dom): 13:00–17:00<br />
+                  Cena (todos los días): 20:00–24:00
                 </p>
-                <p className="text-[#ff9a8b] text-xs mt-1">Miércoles cerrado</p>
               </div>
             </div>
           </motion.div>

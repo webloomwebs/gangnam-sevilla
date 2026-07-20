@@ -114,7 +114,7 @@ export default function Reservas() {
           ) : (
             <>
               <p className="text-sm text-[#2d2d2d]/50 mb-4">
-                Capacidad: 49 personas por franja horaria. Miércoles cerrado.
+                Capacidad: 49 personas por franja horaria. Comida solo Lun/Vie/Sáb/Dom, cena todos los días.
               </p>
               <AvailabilityView
                 reservations={reservations}

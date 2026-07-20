@@ -166,8 +166,11 @@ function DishGallery() {
   );
 }
 
-const TIME_SLOTS_LUNCH = ["13:15", "13:45", "14:15", "14:45", "15:15", "15:45"];
-const TIME_SLOTS_DINNER = ["20:15", "20:45", "21:15", "21:45", "22:15", "22:45"];
+// Horario de verano: comida solo lunes/viernes/sábado/domingo (13:00-17:00),
+// cena todos los días de la semana (20:00-24:00, incluido miércoles)
+const TIME_SLOTS_LUNCH = ["13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00"];
+const TIME_SLOTS_DINNER = ["20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00"];
+const LUNCH_DAYS = new Set([0, 1, 5, 6]); // Domingo, Lunes, Viernes, Sábado
 
 export default function Home() {
   const [formData, setFormData] = useState({
@@ -453,13 +456,8 @@ export default function Home() {
                         }
                       }}
                       disabled={(date) =>
-                        isBefore(startOfDay(date), startOfDay(new Date())) ||
-                        date.getDay() === 3
+                        isBefore(startOfDay(date), startOfDay(new Date()))
                       }
-                      modifiers={{ wednesday: (d) => d.getDay() === 3 }}
-                      modifiersStyles={{
-                        wednesday: { color: '#ccc', textDecoration: 'line-through' }
-                      }}
                       fromDate={new Date()}
                     />
                   </PopoverContent>
@@ -476,10 +474,14 @@ export default function Home() {
                     <SelectValue placeholder={formData.date ? "Seleccione hora" : "Primero elige fecha"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__lunch__" disabled className="text-xs text-gray-400">— Comida —</SelectItem>
-                    {TIME_SLOTS_LUNCH.map(t => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
-                    ))}
+                    {formData.date && LUNCH_DAYS.has(new Date(`${formData.date}T00:00:00`).getDay()) && (
+                      <>
+                        <SelectItem value="__lunch__" disabled className="text-xs text-gray-400">— Comida —</SelectItem>
+                        {TIME_SLOTS_LUNCH.map(t => (
+                          <SelectItem key={t} value={t}>{t}</SelectItem>
+                        ))}
+                      </>
+                    )}
                     <SelectItem value="__dinner__" disabled className="text-xs text-gray-400">— Cena —</SelectItem>
                     {TIME_SLOTS_DINNER.map(t => (
                       <SelectItem key={t} value={t}>{t}</SelectItem>
@@ -569,7 +571,7 @@ export default function Home() {
               {
                 icon: Clock,
                 title: "HORARIO",
-                content: <>lunes-domingos:<br />13:15-16:45<br />20:15-23:45<br />Miércoles cerrado</>
+                content: <>Comida (Lun, Vie-Dom):<br />13:00-17:00<br />Cena (todos los días):<br />20:00-24:00</>
               }
             ].map((item, i) => (
               <motion.div

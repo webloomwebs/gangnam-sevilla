@@ -8,8 +8,11 @@ import { X } from "lucide-react";
 const SUPABASE_URL = 'https://nbcmyfzjylydhvngtalc.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iY215ZnpqeWx5ZGh2bmd0YWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTI1ODYsImV4cCI6MjA5Njc2ODU4Nn0.iqOrYszYHPfbyjcUs2dVGz_EGRL7LffTWbWErATVSJo';
 
-const TIME_SLOTS_LUNCH = ["13:15", "13:45", "14:15", "14:45", "15:15", "15:45"];
-const TIME_SLOTS_DINNER = ["20:15", "20:45", "21:15", "21:45", "22:15", "22:45"];
+// Horario de verano: comida solo lunes/viernes/sábado/domingo (13:00-17:00),
+// cena todos los días de la semana (20:00-24:00, incluido miércoles)
+const TIME_SLOTS_LUNCH = ["13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00"];
+const TIME_SLOTS_DINNER = ["20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00"];
+const LUNCH_DAYS = new Set([0, 1, 5, 6]); // Domingo, Lunes, Viernes, Sábado
 
 export default function ManualReservationForm({ defaultDate, defaultTime, onClose, onSuccess }) {
   const [form, setForm] = useState({
@@ -23,6 +26,7 @@ export default function ManualReservationForm({ defaultDate, defaultTime, onClos
     status: "confirmed",
   });
   const [saving, setSaving] = useState(false);
+  const hasLunch = !form.date || LUNCH_DAYS.has(new Date(`${form.date}T00:00:00`).getDay());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,8 +77,12 @@ export default function ManualReservationForm({ defaultDate, defaultTime, onClos
               <Select value={form.time} onValueChange={v => setForm({...form, time: v})}>
                 <SelectTrigger><SelectValue placeholder="Hora" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__l__" disabled className="text-xs text-gray-400">— Comida —</SelectItem>
-                  {TIME_SLOTS_LUNCH.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  {hasLunch && (
+                    <>
+                      <SelectItem value="__l__" disabled className="text-xs text-gray-400">— Comida —</SelectItem>
+                      {TIME_SLOTS_LUNCH.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    </>
+                  )}
                   <SelectItem value="__d__" disabled className="text-xs text-gray-400">— Cena —</SelectItem>
                   {TIME_SLOTS_DINNER.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                 </SelectContent>
