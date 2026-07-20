@@ -11,18 +11,73 @@ async function sendConfirmationEmail({ name, email, date, time, guests, comments
     return;
   }
 
+  const text = `Hola ${name},
+
+Tu reserva en Gangnam Sevilla está confirmada.
+
+Fecha: ${date}
+Hora: ${time}
+Personas: ${guests}${comments && comments.trim() ? `\nComentarios: ${comments}` : ''}
+
+Si necesitas cambiar algo, llámanos al +34 645 80 57 58.
+
+¡Hasta pronto!
+Gangnam Sevilla
+https://gangnam.es`;
+
+  const filas = [
+    ['Fecha', date],
+    ['Hora', time],
+    ['Personas', guests],
+    ...(comments && comments.trim() ? [['Comentarios', comments]] : []),
+  ].map(([label, value], i, arr) => `
+              <tr>
+                <td style="padding: ${i === 0 ? '0' : '14px'} 0 ${i === arr.length - 1 ? '0' : '14px'}; ${i < arr.length - 1 ? 'border-bottom: 1px solid #F3DEDA;' : ''}">
+                  <div style="font-size: 11px; letter-spacing: 1px; color: #B98A82; text-transform: uppercase; margin-bottom: 3px;">${label}</div>
+                  <div style="font-size: 17px; font-weight: 600; color: #3a2420;">${value}</div>
+                </td>
+              </tr>`).join('');
+
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; color: #1a1a1a;">
-      <h1 style="font-size: 20px; margin-bottom: 4px;">¡Reserva confirmada, ${name}!</h1>
-      <p style="color: #555; font-size: 14px; margin-bottom: 24px;">Te esperamos en Gangnam Sevilla.</p>
-      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-        <tr><td style="padding: 6px 0; color: #888;">Fecha</td><td style="padding: 6px 0; text-align: right;"><strong>${date}</strong></td></tr>
-        <tr><td style="padding: 6px 0; color: #888;">Hora</td><td style="padding: 6px 0; text-align: right;"><strong>${time}</strong></td></tr>
-        <tr><td style="padding: 6px 0; color: #888;">Personas</td><td style="padding: 6px 0; text-align: right;"><strong>${guests}</strong></td></tr>
-        ${comments && comments.trim() ? `<tr><td style="padding: 6px 0; color: #888;">Comentarios</td><td style="padding: 6px 0; text-align: right;">${comments}</td></tr>` : ''}
-      </table>
-      <p style="color: #888; font-size: 12px; margin-top: 32px;">Si necesitas modificar o cancelar tu reserva, responde a este correo.</p>
-    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #FBF1EE; padding: 40px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 460px; background-color: #ffffff; border-radius: 20px; overflow: hidden;">
+            <tr>
+              <td style="padding: 44px 36px 40px; text-align: center;">
+                <h1 style="font-size: 32px; font-weight: 300; letter-spacing: 8px; color: #FF9A8B; margin: 0;">GANGNAM</h1>
+                <div style="width: 36px; height: 2px; background-color: #FF9A8B; margin: 14px auto 18px;"></div>
+                <p style="font-size: 11px; letter-spacing: 2px; color: #b0a29d; text-transform: uppercase; margin: 0 0 28px;">Reserva confirmada</p>
+                <p style="font-size: 15px; color: #444; margin: 0 0 24px;">Hola ${name},</p>
+
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #FFF5F2; border-radius: 14px; margin: 0 0 28px;">
+                  <tr>
+                    <td style="padding: 22px 26px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="text-align: left;">
+                        ${filas}
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="font-size: 13px; color: #aaa; margin: 0 0 4px;">¿Necesitas cambiar algo?</p>
+                <p style="font-size: 14px; margin: 0 0 28px;"><a href="tel:+34645805758" style="color: #FF9A8B; font-weight: 600; text-decoration: none;">+34 645 80 57 58</a></p>
+
+                <p style="font-size: 17px; color: #3a2420; margin: 0 0 32px;">¡Hasta pronto!</p>
+
+                <hr style="border: none; border-top: 1px solid #f0e4e1; margin: 0 0 20px;">
+                <p style="font-size: 11px; color: #c2b5b0; line-height: 1.7; margin: 0;">
+                  Gangnam Sevilla · C. San Felipe, 11, Casco Antiguo, 41003, Sevilla<br>
+                  <a href="https://gangnam.es" style="color: #c2b5b0;">gangnam.es</a> &middot;
+                  <a href="https://gangnam.es/PoliticaPrivacidad" style="color: #c2b5b0;">Privacidad</a> &middot;
+                  <a href="https://gangnam.es/AvisoLegal" style="color: #c2b5b0;">Aviso legal</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   `;
 
   const response = await fetch('https://api.resend.com/emails', {
@@ -33,7 +88,9 @@ async function sendConfirmationEmail({ name, email, date, time, guests, comments
     },
     body: JSON.stringify({
       from: 'Gangnam Sevilla <reservas@gangnam.es>',
+      reply_to: 'gangnam.sevilla@gmail.com',
       to: [email],
+      text,
       subject: `Reserva confirmada — ${date} a las ${time}`,
       html,
     }),

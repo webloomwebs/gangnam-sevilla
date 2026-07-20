@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import AvailabilityView from "@/components/reservas/AvailabilityView";
+import ReviewsView from "@/components/reservas/ReviewsView";
 
 const SUPABASE_URL = 'https://nbcmyfzjylydhvngtalc.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iY215ZnpqeWx5ZGh2bmd0YWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTI1ODYsImV4cCI6MjA5Njc2ODU4Nn0.iqOrYszYHPfbyjcUs2dVGz_EGRL7LffTWbWErATVSJo';
@@ -19,6 +20,20 @@ async function fetchReservations() {
   return res.json();
 }
 
+async function fetchReviews() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/reviews?order=created_at.desc&limit=500`,
+    {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    }
+  );
+  if (!res.ok) throw new Error('Error cargando valoraciones');
+  return res.json();
+}
+
 async function deleteReservation(id) {
   await fetch(`${SUPABASE_URL}/rest/v1/reservations?id=eq.${id}`, {
     method: 'DELETE',
@@ -30,8 +45,11 @@ async function deleteReservation(id) {
 }
 
 export default function Reservas() {
+  const [tab, setTab] = useState('reservas'); // 'reservas' | 'valoraciones'
   const [reservations, setReservations] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(true);
 
   const loadReservations = useCallback(async () => {
     setIsLoading(true);
@@ -45,9 +63,22 @@ export default function Reservas() {
     }
   }, []);
 
+  const loadReviews = useCallback(async () => {
+    setIsLoadingReviews(true);
+    try {
+      const data = await fetchReviews();
+      setReviews(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadReservations();
-  }, [loadReservations]);
+    loadReviews();
+  }, [loadReservations, loadReviews]);
 
   const handleDelete = async (id) => {
     await deleteReservation(id);
@@ -62,19 +93,38 @@ export default function Reservas() {
           <p className="text-[#ff9a8b] text-sm tracking-widest">GANGNAM SEVILLA</p>
         </motion.div>
 
-        {isLoading ? (
-          <p className="text-center text-[#2d2d2d]/50 py-12">Cargando...</p>
+        <div className="flex gap-6 mb-8 border-b border-[#eee]">
+          <button
+            onClick={() => setTab('reservas')}
+            className={`pb-3 text-sm tracking-wide ${tab === 'reservas' ? 'text-[#1a1a1a] border-b-2 border-[#ff9a8b]' : 'text-[#2d2d2d]/40'}`}
+          >
+            Reservas
+          </button>
+          <button
+            onClick={() => setTab('valoraciones')}
+            className={`pb-3 text-sm tracking-wide ${tab === 'valoraciones' ? 'text-[#1a1a1a] border-b-2 border-[#ff9a8b]' : 'text-[#2d2d2d]/40'}`}
+          >
+            Valoraciones
+          </button>
+        </div>
+
+        {tab === 'reservas' ? (
+          isLoading ? (
+            <p className="text-center text-[#2d2d2d]/50 py-12">Cargando...</p>
+          ) : (
+            <>
+              <p className="text-sm text-[#2d2d2d]/50 mb-4">
+                Capacidad: 49 personas por franja horaria. Miércoles cerrado.
+              </p>
+              <AvailabilityView
+                reservations={reservations}
+                onRefresh={loadReservations}
+                onDelete={handleDelete}
+              />
+            </>
+          )
         ) : (
-          <>
-            <p className="text-sm text-[#2d2d2d]/50 mb-4">
-              Capacidad: 49 personas por franja horaria. Miércoles cerrado.
-            </p>
-            <AvailabilityView
-              reservations={reservations}
-              onRefresh={loadReservations}
-              onDelete={handleDelete}
-            />
-          </>
+          <ReviewsView reviews={reviews} isLoading={isLoadingReviews} />
         )}
       </div>
     </div>

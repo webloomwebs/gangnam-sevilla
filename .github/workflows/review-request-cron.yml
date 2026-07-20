@@ -1,0 +1,14 @@
+name: Review Request Cron
+
+on:
+  schedule:
+    - cron: '5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger review-request endpoint
+        run: |
+          curl -sf -X POST "https://gangnam.es/api/crons/review-request"             -H "x-cron-secret: ${{ secrets.REVIEW_CRON_SECRET }}"

@@ -8,6 +8,7 @@ import AvisoLegal from './pages/AvisoLegal';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import PoliticaCookies from './pages/PoliticaCookies';
 import Reservas from './pages/Reservas';
+import Valorar from './pages/Valorar';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/PoliticaPrivacidad" element={<PoliticaPrivacidad />} />
         <Route path="/PoliticaCookies" element={<PoliticaCookies />} />
         <Route path="/Reservas" element={<Reservas />} />
+        <Route path="/Valorar" element={<Valorar />} />
         <Route path="*" element={<Home />} />
       </Routes>
       <Toaster />
